@@ -7,13 +7,14 @@
     <script src="https://unpkg.com/htmx.org@1.9.6"
         integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
         crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body>
-    <div id="counter"></div>
-    <button hx-post="/increment" hx-trigger="click" hx-target="#counter">
-        Inc
-    </button>
+    <h1>Todo List</h1>
+    {{range .}}
+    {{template "todo.html" .}}
+    {{end}}
 </body>
 
 </html>

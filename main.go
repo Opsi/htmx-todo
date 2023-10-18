@@ -12,22 +12,29 @@ func main() {
 	}
 }
 
+type Todo struct {
+	ID    int
+	Title string
+}
+
 func run() error {
 
+	tmpl, err := template.ParseGlob("templates/*.html")
+	if err != nil {
+		return fmt.Errorf("parse templates: %w", err)
+	}
+
+	todos := []Todo{
+		{ID: 1, Title: "Buy groceries"},
+		{ID: 2, Title: "Finish homework"},
+	}
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tmpl, err := template.ParseFiles("index.html")
+		err = tmpl.ExecuteTemplate(w, "index.html", todos)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		tmpl.Execute(w, nil)
-	})
-	counter := 0
-	http.HandleFunc("/increment", func(w http.ResponseWriter, r *http.Request) {
-		tmplStr := `<div id="counter">{{ . }}</div>`
-		tmpl := template.Must(template.New("counter").Parse(tmplStr))
-		tmpl.ExecuteTemplate(w, "counter", counter)
-		counter++
 	})
 
 	// Start the HTTP server on port 8080
