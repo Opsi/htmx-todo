@@ -1,15 +1,18 @@
-<div id="todo-{{ .ID }}" class="flex items-start gap-2 rounded-md bg-gray-300">
+<div id="todo-{{ .ID }}" class="flex gap-2 bg-gray-300">
     {{ if .Checked }}
-    <button hx-target="#todo-{{ .ID }}" hx-post="/todo/{{ .ID }}">
+    <button hx-target="#todo-{{ .ID }}" hx-put="/toggletodo/{{ .ID }}" hx-swap="outerHTML">
         Check
     </button>
     <h3>{{ .Title }}</h3>
     {{ else }}
-    <button hx-target="#todo-{{ .ID }}" hx-post="/todo/{{ .ID }}">
+    <button hx-target="#todo-{{ .ID }}" hx-put="/toggletodo/{{ .ID }}" hx-swap="outerHTML">
         Uncheck
     </button>
     <h3 class="line-through">{{ .Title }}</h3>
     {{ end }}
+    <button class="bg-yellow-300" hx-get="/edittodo/{{ .ID }}" hx-target="#todo-{{ .ID }}" hx-swap="outerHTML">
+        Edit
+    </button>
     <button class="bg-red-300" hx-delete="/todo/{{ .ID }}" hx-target="#todo-{{ .ID }}" hx-swap="outerHTML">
         Delete
     </button>

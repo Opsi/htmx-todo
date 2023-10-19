@@ -1,0 +1,8 @@
+<form hx-put="/todo/{{ .ID }}" hx-target="this" hx-swap="outerHTML">
+    <div>
+        <label>Title</label>
+        <input type="text" name="title" value="{{ .Title }}">
+    </div>
+    <button class="btn">Submit</button>
+    <button class="btn" hx-get="/todo/{{ .ID }}">Cancel</button>
+</form>

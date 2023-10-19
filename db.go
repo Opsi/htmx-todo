@@ -8,11 +8,6 @@ type Todo struct {
 	Checked bool
 }
 
-type TodoUpdate struct {
-	Title   *string
-	Checked *bool
-}
-
 type todoRepo struct {
 	mu    sync.Mutex
 	todos []Todo
@@ -25,7 +20,8 @@ type TodoRepo interface {
 	GetAll() []Todo
 	Get(id int) (Todo, bool)
 	Create(title string) Todo
-	Update(id int, update TodoUpdate) (Todo, bool)
+	Update(id int, title string) (Todo, bool)
+	Toggle(id int) (Todo, bool)
 	Delete(id int) bool
 }
 
@@ -69,20 +65,26 @@ func (r *todoRepo) Create(title string) Todo {
 	return newTodo
 }
 
-func (r *todoRepo) Update(id int, update TodoUpdate) (Todo, bool) {
+func (r *todoRepo) Toggle(id int) (Todo, bool) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	for i, todo := range r.todos {
-		if todo.ID != id {
-			continue
+		if todo.ID == id {
+			r.todos[i].Checked = !r.todos[i].Checked
+			return r.todos[i], true
 		}
-		if update.Title != nil {
-			r.todos[i].Title = *update.Title
+	}
+	return Todo{}, false
+}
+
+func (r *todoRepo) Update(id int, title string) (Todo, bool) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for i, todo := range r.todos {
+		if todo.ID == id {
+			r.todos[i].Title = title
+			return r.todos[i], true
 		}
-		if update.Checked != nil {
-			r.todos[i].Checked = *update.Checked
-		}
-		return r.todos[i], true
 	}
 	return Todo{}, false
 }

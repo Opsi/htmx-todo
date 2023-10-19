@@ -23,8 +23,8 @@ func readTemplates() (*template.Template, error) {
 	return tmpl, nil
 }
 
-func extractTodoID(r *http.Request) (int, error) {
-	todoIDRegex := regexp.MustCompile(`/todo/(\d+)$`)
+func extractInt(r *http.Request, regex string) (int, error) {
+	todoIDRegex := regexp.MustCompile(regex)
 	matches := todoIDRegex.FindStringSubmatch(r.URL.Path)
 	if len(matches) < 2 {
 		return 0, fmt.Errorf("invalid todo id")
@@ -46,6 +46,54 @@ func run() error {
 			return
 		}
 		tmpl.ExecuteTemplate(w, "index.html", todoRepo.GetAll())
+	})
+
+	http.HandleFunc("/edittodo/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		todoID, err := extractInt(r, `/edittodo/(\d+)$`)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		tmpl, err := readTemplates()
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+		todo, ok := todoRepo.Get(todoID)
+		if !ok {
+			http.Error(w, "todo not found", http.StatusNotFound)
+			return
+		}
+		tmpl.ExecuteTemplate(w, "edittodo.html", todo)
+	})
+
+	http.HandleFunc("/toggletodo/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		todoID, err := extractInt(r, `/toggletodo/(\d+)$`)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		tmpl, err := readTemplates()
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+		todo, ok := todoRepo.Toggle(todoID)
+		if !ok {
+			http.Error(w, "todo not found", http.StatusNotFound)
+			return
+		}
+		tmpl.ExecuteTemplate(w, "todo.html", todo)
 	})
 
 	http.HandleFunc("/todo", func(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +119,7 @@ func run() error {
 	})
 
 	http.HandleFunc("/todo/", func(w http.ResponseWriter, r *http.Request) {
-		todoID, err := extractTodoID(r)
+		todoID, err := extractInt(r, `/todo/(\d+)$`)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -92,12 +140,18 @@ func run() error {
 			tmpl.ExecuteTemplate(w, "todo.html", todo)
 			return
 		case r.Method == http.MethodPut:
-			var update TodoUpdate
-			if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
+			// encode form data
+			err := r.ParseForm()
+			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			todo, ok := todoRepo.Update(todoID, update)
+			title := r.Form.Get("title")
+			if title == "" {
+				http.Error(w, "title cannot be empty", http.StatusBadRequest)
+				return
+			}
+			todo, ok := todoRepo.Update(todoID, title)
 			if !ok {
 				http.Error(w, "todo not found", http.StatusNotFound)
 				return
