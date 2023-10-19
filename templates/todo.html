@@ -1,19 +1,21 @@
-<div id="todo-{{ .ID }}" class="flex gap-2 bg-gray-300">
-    {{ if .Checked }}
-    <button hx-target="#todo-{{ .ID }}" hx-put="/toggletodo/{{ .ID }}" hx-swap="outerHTML">
-        Check
-    </button>
-    <h3>{{ .Title }}</h3>
-    {{ else }}
-    <button hx-target="#todo-{{ .ID }}" hx-put="/toggletodo/{{ .ID }}" hx-swap="outerHTML">
-        Uncheck
-    </button>
-    <h3 class="line-through">{{ .Title }}</h3>
-    {{ end }}
-    <button class="bg-yellow-300" hx-get="/edittodo/{{ .ID }}" hx-target="#todo-{{ .ID }}" hx-swap="outerHTML">
-        Edit
-    </button>
-    <button class="bg-red-300" hx-delete="/todo/{{ .ID }}" hx-target="#todo-{{ .ID }}" hx-swap="outerHTML">
-        Delete
-    </button>
+<div id="todo-{{ .ID }}" class="flex gap-2 bg-gray-200 shadow-md rounded-md px-4 py-2">
+    <h3 class="{{ if .Checked }}line-through{{ end }} text-lg truncate flex-grow">{{ .Title }}</h3>
+    <div class="grid grid-cols-3 gap-2 w-60 min-w-fit">
+        <button class="rounded-sm bg-blue-200 shadow-md" hx-target="#todo-{{ .ID }}" hx-put="/toggletodo/{{ .ID }}"
+            hx-swap="outerHTML">
+            {{ if .Checked }}
+            UNDO
+            {{ else }}
+            CHECK
+            {{ end }}
+        </button>
+        <button class="rounded-sm bg-yellow-200 shadow-md" hx-get="/edittodo/{{ .ID }}" hx-target="#todo-{{ .ID }}"
+            hx-swap="outerHTML">
+            EDIT
+        </button>
+        <button class="rounded-sm bg-red-200 shadow-md" hx-delete="/todo/{{ .ID }}" hx-target="#todo-{{ .ID }}"
+            hx-swap="outerHTML">
+            DELETE
+        </button>
+    </div>
 </div>
