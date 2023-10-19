@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -105,12 +104,17 @@ func run() error {
 		}
 		switch {
 		case r.Method == http.MethodPost:
-			var todo Todo
-			if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
+			err := r.ParseForm()
+			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			todo = todoRepo.Create(todo.Title)
+			title := r.Form.Get("title")
+			if title == "" {
+				http.Error(w, "title cannot be empty", http.StatusBadRequest)
+				return
+			}
+			todo := todoRepo.Create(title)
 			tmpl.ExecuteTemplate(w, "todo.html", todo)
 			return
 		default:

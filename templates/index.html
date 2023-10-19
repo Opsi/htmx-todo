@@ -12,9 +12,18 @@
 
 <body>
     <h1>Todo List</h1>
-    {{range .}}
-    {{template "todo.html" .}}
-    {{end}}
+    <div id="todolist">
+        {{range .}}
+        {{template "todo.html" .}}
+        {{end}}
+    </div>
+    <form hx-post="/todo" hx-target="#todolist" hx-swap="beforeend">
+        <div>
+            <label>Title</label>
+            <input type="text" name="title" value="" placeholder="Insert title...">
+        </div>
+        <button class="bg-green-300">Add Todo</button>
+    </form>
 </body>
 
 </html>
