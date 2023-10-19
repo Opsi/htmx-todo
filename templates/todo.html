@@ -10,4 +10,7 @@
     </button>
     <h3 class="line-through">{{ .Title }}</h3>
     {{ end }}
+    <button class="bg-red-300" hx-delete="/todo/{{ .ID }}" hx-target="#todo-{{ .ID }}" hx-swap="outerHTML">
+        Delete
+    </button>
 </div>
